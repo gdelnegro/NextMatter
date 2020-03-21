@@ -19,6 +19,13 @@ class TestWebSiteInformation(TestCase):
         WebSiteInformation("http://google.com")
         WebSiteInformation("google.com")
 
+    @patch("backend.models.requests.get")
+    def test_website_html(self, mock_requests):
+        test_html = "<html><a href='./test'></a><a href='http://google.com'></a></html>"
+        mock_requests.return_value = Mock(status_code=200, text=test_html)
+        website = WebSiteInformation("http://google.com")
+        assert test_html == website.website_html
+
     def test__get_website_information_fails_for_invalid_urls(self):
         with self.assertRaises(expected_exception=InvalidURLException):
             WebSiteInformation(url='invalid_url')
@@ -57,12 +64,43 @@ class TestWebSiteInformation(TestCase):
         assert "http://google.com.br/test" == WebSiteInformation._format_href("http://google.com.br", "../../../../../test")
         assert "http://rte.ie" == WebSiteInformation._format_href("http://google.com.br", "http://rte.ie")
 
-    def test_get_all_links(self):
-        pass
+    @patch("backend.models.requests.get")
+    def test__get_all_links(self, mock_requests):
+        mock_requests.return_value = Mock(status_code=200)
+        html = "<html><a href='./test'></a><a href='http://google.com'></a><a></a></html>"
+        soup = BeautifulSoup(html, "html.parser")
+        links = WebSiteInformation._get_all_links('http://test.com', soup)
+        assert dict is type(links)
+        assert "http://google.com" in links["external"]
+        assert "http://test.com/test" in links["internal"]
 
+    @patch("backend.models.requests.get")
+    def test__get_all_links_unreachable_links(self, mock_requests):
+        mock_requests.return_value = Mock(status_code=400)
+        html = "<html><a href='./test'></a><a href='http://google.com'></a></html>"
+        soup = BeautifulSoup(html, "html.parser")
+        links = WebSiteInformation._get_all_links('http://test.com', soup)
+        assert dict is type(links)
+        assert "http://google.com" not in links["external"]
+        assert "http://test.com/test" not in links["internal"]
+        assert "http://test.com/test" in links["unreachable"]
+
+    @patch("backend.models.requests.get")
+    def test_get_website_information(self, mock_requests):
+        test_html = '<!DOCTYPE html><html><head><title>Test</title></head><body><h2>HTML Links</h2><p><a href="https://www.google.com/html/">This will go to google</a></p></body></html>'
+        mock_requests.return_value = Mock(status_code=200, text=test_html)
+        website = WebSiteInformation("http://google.com")
+        website.get_website_information()
+        assert "Test" == website.title
+        assert isinstance(website.links, dict)
+        assert "https://www.google.com/html/" in website.links["internal"]
+        assert isinstance(website.headers, dict)
+        assert "h2" in website.headers
+        assert 1 == website.headers["h2"]
 
     def test_to_json(self):
-        pass
+        website = WebSiteInformation("http://google.com")
+        website.to_json()
 
     def test_from_json(self):
-        pass
+        WebSiteInformation.from_json('')

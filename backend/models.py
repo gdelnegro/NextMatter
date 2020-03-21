@@ -94,35 +94,43 @@ class WebSiteInformation:
                 headers[header_tag] += 1
         return headers
 
-    def _get_website_information(self):
+    @staticmethod
+    def _get_all_links(url, soup):
+        links = {
+            "internal": set(),
+            "external": set(),
+            "unreachable": set()
+        }
+
+        domain_name = urlparse(url).netloc
+        for a_tag in soup.findAll("a"):
+            href = a_tag.attrs.get("href")
+            if not href:
+                continue
+            formatted_href = WebSiteInformation._format_href(url, href)
+            if not WebSiteInformation.is_valid_url(formatted_href):
+                continue
+            if formatted_href in links["internal"]:
+                pass
+            if formatted_href in links["external"]:
+                pass
+            if WebSiteInformation.ping_url(formatted_href):
+                if domain_name not in formatted_href:
+                    links["external"].add(formatted_href)
+                else:
+                    links["internal"].add(formatted_href)
+            else:
+                links["unreachable"].add(formatted_href)
+        return links
+
+    def get_website_information(self):
         response = requests.get(self.url)
         if response.status_code == 200:
             soup = BeautifulSoup(self.website_html, "html.parser")
             self.title = soup.title.string
             self.headers = WebSiteInformation._get_all_headers(soup)
             self.has_login = WebSiteInformation._has_login_form(soup)
-
-    def get_all_links(self):
-        domain_name = urlparse(self.url).netloc
-        soup = BeautifulSoup(self.website_html, "html.parser")
-        for a_tag in soup.findAll("a"):
-            href = a_tag.attrs.get("href")
-            if not href:
-                continue
-            formatted_href = WebSiteInformation._format_href(self.url, href)
-            if not WebSiteInformation.is_valid_url(formatted_href):
-                continue
-            if formatted_href in self.links["internal"]:
-                pass
-            if formatted_href in self.links["external"]:
-                pass
-            if WebSiteInformation.ping_url(formatted_href):
-                if domain_name not in formatted_href:
-                    self.links["external"].add(formatted_href)
-                else:
-                    self.links["internal"].add(formatted_href)
-            else:
-                self.links["unreachable"].add(formatted_href)
+            self.links = WebSiteInformation._get_all_links(self.url, soup)
 
     def to_json(self):
         pass
