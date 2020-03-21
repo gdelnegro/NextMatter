@@ -1,3 +1,4 @@
+import json
 from unittest import TestCase
 from unittest.mock import patch, Mock, MagicMock
 
@@ -98,9 +99,18 @@ class TestWebSiteInformation(TestCase):
         assert "h2" in website.headers
         assert 1 == website.headers["h2"]
 
-    def test_to_json(self):
+    @patch("backend.models.requests.get")
+    def test_to_json(self, mock_requests):
         website = WebSiteInformation("http://google.com")
-        website.to_json()
+        test_html = '<!DOCTYPE html><html><head><title>Test</title></head><body><h2>HTML Links</h2><p><a href="https://www.google.com/html/">This will go to google</a></p></body></html>'
+        mock_requests.return_value = Mock(status_code=200, text=test_html)
+        _json = website.to_json()
+        json_object = json.loads(_json)
+        assert json_object["url"] == website.url
+        assert json_object["title"] == website.title
+        assert json_object["headers"] == website.headers
+        assert json_object["links"] == website.links
+        assert json_object["has_login"] == website.has_login
 
     def test_from_json(self):
         WebSiteInformation.from_json('')

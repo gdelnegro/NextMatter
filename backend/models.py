@@ -1,3 +1,4 @@
+import json
 import re
 from urllib.parse import urlparse, urljoin
 
@@ -13,9 +14,9 @@ class WebSiteInformation:
     title = None
     headers = {}
     links = {
-        "internal": set(),
-        "external": set(),
-        "unreachable": set()
+        "internal": list(),
+        "external": list(),
+        "unreachable": list()
     }
     has_login = None
     _html = None
@@ -97,9 +98,9 @@ class WebSiteInformation:
     @staticmethod
     def _get_all_links(url, soup):
         links = {
-            "internal": set(),
-            "external": set(),
-            "unreachable": set()
+            "internal": list(),
+            "external": list(),
+            "unreachable": list()
         }
 
         domain_name = urlparse(url).netloc
@@ -116,11 +117,11 @@ class WebSiteInformation:
                 pass
             if WebSiteInformation.ping_url(formatted_href):
                 if domain_name not in formatted_href:
-                    links["external"].add(formatted_href)
+                    links["external"].append(formatted_href)
                 else:
-                    links["internal"].add(formatted_href)
+                    links["internal"].append(formatted_href)
             else:
-                links["unreachable"].add(formatted_href)
+                links["unreachable"].append(formatted_href)
         return links
 
     def get_website_information(self):
@@ -133,7 +134,13 @@ class WebSiteInformation:
             self.links = WebSiteInformation._get_all_links(self.url, soup)
 
     def to_json(self):
-        pass
+        return json.dumps({
+            "url": self.url,
+            "title": self.title,
+            "headers": self.headers,
+            "links": self.links,
+            "has_login": self.has_login
+        })
 
     @classmethod
     def from_json(cls, json):
