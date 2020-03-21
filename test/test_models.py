@@ -1,5 +1,8 @@
 from unittest import TestCase
 from unittest.mock import patch, Mock, MagicMock
+
+from bs4 import BeautifulSoup
+
 from backend.models import WebSiteInformation
 from backend.exceptions import InvalidURLException
 
@@ -42,3 +45,24 @@ class TestWebSiteInformation(TestCase):
         assert WebSiteInformation._has_login_form('blablablasign inlololakdkljas') is True
         assert WebSiteInformation._has_login_form('blablablaSign inlololakdkljas') is True
         assert WebSiteInformation._has_login_form('blablablaLog inlololakdkljas') is True
+
+    def test__get_all_headers(self):
+        html = "<html><h1>test</h1><h2>test2</h2></html>"
+        soup = BeautifulSoup(html, "html.parser")
+        headers = WebSiteInformation._get_all_headers(soup)
+        assert 1 == headers["h1"]
+        assert 1 == headers["h2"]
+
+    def test__format_href(self):
+        assert "http://google.com.br/test" == WebSiteInformation._format_href("http://google.com.br", "../../../../../test")
+        assert "http://rte.ie" == WebSiteInformation._format_href("http://google.com.br", "http://rte.ie")
+
+    def test_get_all_links(self):
+        pass
+
+
+    def test_to_json(self):
+        pass
+
+    def test_from_json(self):
+        pass
