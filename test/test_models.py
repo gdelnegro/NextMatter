@@ -101,9 +101,9 @@ class TestWebSiteInformation(TestCase):
 
     @patch("backend.models.requests.get")
     def test_to_json(self, mock_requests):
-        website = WebSiteInformation("http://google.com")
         test_html = '<!DOCTYPE html><html><head><title>Test</title></head><body><h2>HTML Links</h2><p><a href="https://www.google.com/html/">This will go to google</a></p></body></html>'
         mock_requests.return_value = Mock(status_code=200, text=test_html)
+        website = WebSiteInformation("http://google.com")
         _json = website.to_json()
         json_object = json.loads(_json)
         assert json_object["url"] == website.url
@@ -112,5 +112,14 @@ class TestWebSiteInformation(TestCase):
         assert json_object["links"] == website.links
         assert json_object["has_login"] == website.has_login
 
-    def test_from_json(self):
-        WebSiteInformation.from_json('')
+    @patch("backend.models.requests.get")
+    def test_from_json(self, mock_requests):
+        test_html = '<!DOCTYPE html><html><head><title>Test</title></head><body><h2>HTML Links</h2><p><a href="https://www.google.com/html/">This will go to google</a></p></body></html>'
+        mock_requests.return_value = Mock(status_code=200, text=test_html)
+        website_from_json = WebSiteInformation.from_json('{"url": "http://google.com", "title": null, "headers": {}, "links": {"internal": [], "external": [], "unreachable": []}, "has_login": null}')
+        website = WebSiteInformation("http://google.com")
+        assert website_from_json.url == website.url
+        assert website_from_json.title == website.title
+        assert website_from_json.has_login == website.has_login
+        assert website_from_json.headers == website.headers
+        assert website_from_json.links == website.links

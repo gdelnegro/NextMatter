@@ -143,5 +143,11 @@ class WebSiteInformation:
         })
 
     @classmethod
-    def from_json(cls, json):
-        pass
+    def from_json(cls, json_string):
+        json_representation = json.loads(json_string)
+        website = cls(json_representation["url"])
+        website.has_login = json_representation["has_login"]
+        website.title = json_representation["title"]
+        website.headers = json_representation["headers"]
+        website.links = json_representation["links"]
+        return website
