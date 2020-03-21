@@ -12,6 +12,10 @@ class TestWebSiteInformation(TestCase):
         assert WebSiteInformation.is_valid_url("invalid_website.com") is False
         assert WebSiteInformation.is_valid_url("http://invalid_website.com") is False
 
+    def test_WebSiteInformation(self):
+        WebSiteInformation("http://google.com")
+        WebSiteInformation("google.com")
+
     def test__get_website_information_fails_for_invalid_urls(self):
         with self.assertRaises(expected_exception=InvalidURLException):
             WebSiteInformation(url='invalid_url')
@@ -34,4 +38,7 @@ class TestWebSiteInformation(TestCase):
         with self.assertRaises(expected_exception=ValueError):
             WebSiteInformation.ping_url("http://google.com")
 
-
+    def test__has_login_form(self):
+        assert WebSiteInformation._has_login_form('blablablasign inlololakdkljas') is True
+        assert WebSiteInformation._has_login_form('blablablaSign inlololakdkljas') is True
+        assert WebSiteInformation._has_login_form('blablablaLog inlololakdkljas') is True
