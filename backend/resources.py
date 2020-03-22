@@ -1,10 +1,11 @@
-from flask_restful import Resource
+from flask_restful import Resource, reqparse
+from backend.models import WebSiteInformation
 
 
-class WebSiteInformation(Resource):
+class WebSiteInformationResource(Resource):
 
-    def get(self):
-        return {'hello': 'world'}
+    def get(self, url):
+        website = WebSiteInformation(url)
+        website.get_website_information()
 
-    def _analyze_website(self, url):
-        pass
+        return website.to_dict()

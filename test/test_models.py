@@ -100,6 +100,19 @@ class TestWebSiteInformation(TestCase):
         assert 1 == website.headers["h2"]
 
     @patch("backend.models.requests.get")
+    def test_to_dict(self, mock_requests):
+        test_html = '<!DOCTYPE html><html><head><title>Test</title></head><body><h2>HTML Links</h2><p><a href="https://www.google.com/html/">This will go to google</a></p></body></html>'
+        mock_requests.return_value = Mock(status_code=200, text=test_html)
+        website = WebSiteInformation("http://google.com")
+        dict_representation = website.to_dict()
+        assert dict_representation["url"] == website.url
+        assert dict_representation["title"] == website.title
+        assert dict_representation["headers"] == website.headers
+        assert dict_representation["links"] == website.links
+        assert dict_representation["has_login"] == website.has_login
+
+
+    @patch("backend.models.requests.get")
     def test_to_json(self, mock_requests):
         test_html = '<!DOCTYPE html><html><head><title>Test</title></head><body><h2>HTML Links</h2><p><a href="https://www.google.com/html/">This will go to google</a></p></body></html>'
         mock_requests.return_value = Mock(status_code=200, text=test_html)
