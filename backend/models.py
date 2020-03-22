@@ -1,17 +1,14 @@
 import json
 import re
-from urllib.parse import urlparse, urljoin
 
 import validators
 import requests
+
 from bs4 import BeautifulSoup
+from urllib.parse import urlparse, urljoin
 
-from backend.data_access import get_data_from_cache
+from backend.data_access import get_website_html
 from backend.exceptions import InvalidURLException
-
-#ToDo:
-# [ ] implement data store
-# [ ] implement cache check
 
 
 class WebSiteInformation:
@@ -47,12 +44,6 @@ class WebSiteInformation:
             self.url = valid_urls[0]
         else:
             raise InvalidURLException
-
-    @property
-    def website_html(self):
-        if not self._html:
-            self._html = requests.get(self.url).text
-        return self._html
 
     @staticmethod
     def is_valid_url(url):
@@ -131,22 +122,12 @@ class WebSiteInformation:
         return links
 
     def get_website_information(self):
-        cached_data = get_data_from_cache(self.url)
-        if not cached_data:
-            response = requests.get(self.url)
-            if response.status_code == 200:
-                soup = BeautifulSoup(self.website_html, "html.parser")
-                self.title = soup.title.string
-                self.headers = WebSiteInformation._get_all_headers(soup)
-                self.has_login = WebSiteInformation._has_login_form(soup)
-                self.links = WebSiteInformation._get_all_links(self.url, soup)
-        else:
-            websitedata_from_cache = WebSiteInformation.from_json(cached_data)
-            self.title = websitedata_from_cache.title
-            self.url = websitedata_from_cache.url
-            self.has_login = websitedata_from_cache.has_login
-            self.headers = websitedata_from_cache.headers
-            self.links = websitedata_from_cache.links
+        website_html = get_website_html(self.url)
+        soup = BeautifulSoup(website_html, "html.parser")
+        self.title = soup.title.string
+        self.headers = WebSiteInformation._get_all_headers(soup)
+        self.has_login = WebSiteInformation._has_login_form(soup)
+        self.links = WebSiteInformation._get_all_links(self.url, soup)
 
     def to_dict(self):
         return {

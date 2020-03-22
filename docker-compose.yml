@@ -1,0 +1,15 @@
+version: '3'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: BackEndDockerFile
+    ports:
+      - "5000:5000"
+    links:
+      - cache
+  cache:
+    image: redis
+    command: redis-server
+    ports:
+      - "6379:6379"

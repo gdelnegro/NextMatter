@@ -20,13 +20,6 @@ class TestWebSiteInformation(TestCase):
         WebSiteInformation("http://google.com")
         WebSiteInformation("google.com")
 
-    @patch("backend.models.requests.get")
-    def test_website_html(self, mock_requests):
-        test_html = "<html><a href='./test'></a><a href='http://google.com'></a></html>"
-        mock_requests.return_value = Mock(status_code=200, text=test_html)
-        website = WebSiteInformation("http://google.com")
-        assert test_html == website.website_html
-
     def test__get_website_information_fails_for_invalid_urls(self):
         with self.assertRaises(expected_exception=InvalidURLException):
             WebSiteInformation(url='invalid_url')
