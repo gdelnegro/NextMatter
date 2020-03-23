@@ -1,3 +1,57 @@
+# Description of the solution
+
+First I have made a simple design of how the components should interact between them and how to "split" the code. I decided to use a separate data layer, so I could decouple the
+caching solution from the business logic.
+Instead of creating everything from "scratch" I decided to use established libraries that I have used before (like Flask and Flask-RESTful) or that had a good feedback from the community ( case of Flash-Caching).
+I opted for using already existing libraries to avoid "reinventing the wheel" and focusing on the design of the solution.
+To start the coding, I used a TDD approach so I could refine the code as I went.
+
+The biggest time investment was Docker. The last time I used it was more the three years ago and I needed to "refresh" my knowledge about it. 
+The requirements were clear and did not let to ambiguity.
+
+## Usage
+
+curl http://localhost:5000/website_info/google.com.br
+
+result:
+```
+{
+    "url": "http://google.com.br",
+    "title": "Google",
+    "headers": {},
+    "links": {
+        "internal": [
+            "http://google.com.br/preferences",
+            "http://google.com.br/advanced_search",
+            "http://www.google.com.br/setprefs",
+            "http://www.google.com.br/setprefs",
+            "http://google.com.br/intl/en/ads/",
+            "http://google.com.br/intl/en/about.html",
+            "http://www.google.com.br/setprefdomain",
+            "http://google.com.br/intl/en/policies/privacy/",
+            "http://google.com.br/intl/en/policies/terms/"
+        ],
+        "external": [
+            "http://www.google.ie/imghp",
+            "http://maps.google.ie/maps",
+            "https://play.google.com/",
+            "http://www.youtube.com/",
+            "http://news.google.ie/nwshp",
+            "https://mail.google.com/mail/",
+            "https://drive.google.com/",
+            "https://www.google.ie/intl/en/about/products",
+            "http://www.google.ie/history/optout",
+            "https://accounts.google.com/ServiceLogin",
+            "http://www.google.ie/intl/en/services/"
+        ],
+        "unreachable": []
+    },
+    "has_login": true
+}
+```
+
+----
+
 ## Analyzing websites
 
 ### The task

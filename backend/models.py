@@ -7,7 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 
-from backend.data_access import get_website_html
+from backend.data_access import get_website_html, ping_url
 from backend.exceptions import InvalidURLException
 
 
@@ -49,14 +49,6 @@ class WebSiteInformation:
     def is_valid_url(url):
         validation_result = validators.url(url)
         if validation_result is True:
-            return True
-        else:
-            return False
-
-    @staticmethod
-    def ping_url(url):
-        response = requests.get(url)
-        if response.status_code == 200:
             return True
         else:
             return False
@@ -112,7 +104,7 @@ class WebSiteInformation:
                 pass
             if formatted_href in links["external"]:
                 pass
-            if WebSiteInformation.ping_url(formatted_href):
+            if ping_url(formatted_href):
                 if domain_name not in formatted_href:
                     links["external"].append(formatted_href)
                 else:
